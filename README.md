@@ -1,56 +1,60 @@
-# 🤖 Projeto: Otimização de Entregas Urbanas com Algoritmos de IA
+# 🤖 Projeto: Otimização de Entregas Urbanas com Abordagem Híbrida
 
-Este projeto resolve o desafio de logística urbana, utilizando técnicas de Aprendizado de Máquina Não Supervisionado e Algoritmos de Busca para agrupar entregas próximas e otimizar o trabalho dos entregadores.
+Este projeto resolve o desafio de logística urbana, combinando técnicas de Aprendizado de Máquina Não Supervisionado (Clustering) e uma Heurística de Busca (Vizinho Mais Próximo) para agrupar entregas e otimizar o trabalho dos entregadores.
 
-## 📌 1. Descrição do Problema e Objetivos
+## 📌 1. Descrição do Problema, Desafio e Objetivos
 
-O principal desafio é o alto custo e a ineficiência logística na entrega final. Entregadores gastam tempo e combustível excessivos em rotas desorganizadas. O objetivo deste projeto é:
-1. Agrupar geograficamente entregas próximas utilizando **Clustering**.
-2. Propor uma solução teórica de **otimização de rota** para cada grupo.
-3. Reduzir custos operacionais, o tempo de entrega e o impacto ambiental (sustentabilidade).
+O principal desafio é o alto custo e a ineficiência logística no processo de entrega, onde rotas desorganizadas resultam em excesso de tempo e consumo de combustível.
+
+**Desafio Proposto:** Desenvolver uma solução de duas etapas para o Problema de Roteamento de Veículos (VRP - Vehicle Routing Problem) simplificado, visando:
+1. Agrupar geograficamente entregas próximas (**Clustering**).
+2. Propor uma sequência de entregas otimizada (**TSP - Caixeiro Viajante**) para cada grupo.
+
+**Objetivos:**
+* Reduzir a distância total percorrida e o tempo de entrega.
+* Minimizar custos operacionais e o impacto ambiental.
 
 ## 💡 2. Explicação Detalhada da Abordagem Adotada
 
-Nossa solução é dividida em duas fases essenciais para o planejamento logístico:
+Nossa solução é dividida em duas fases de otimização sequencial:
 
-### Fase 1: Agrupamento Inteligente (Clustering)
-Nesta fase, utilizamos **Aprendizado Não Supervisionado** para processar as coordenadas (Latitude e Longitude) dos pontos de entrega. O resultado é a criação de **zonas de entrega coesas**.
+### Fase 1: Agrupamento de Zonas (K-Means)
+Utilizamos o algoritmo de **K-Means** (Aprendizado Não Supervisionado) para processar as coordenadas geográficas (Latitude e Longitude) dos pontos de entrega. O objetivo é criar 'K' zonas de entrega coesas, onde os pontos de cada cluster estão próximos entre si. O número ideal de clusters ('K') é determinado pelo **Método do Cotovelo**.
 
-### Fase 2: Otimização de Rota por Zona (Busca e Grafos)
-Após a definição das zonas, cada grupo é tratado como um **Grafo** (onde as entregas são **nós** e as ruas são **arestas**). A otimização da rota interna é feita através da aplicação teórica de algoritmos de busca, visando o caminho mais rápido entre todos os nós do cluster.
+### Fase 2: Sequenciamento da Rota por Zona (Heurística do Vizinho Mais Próximo)
+Após o agrupamento, cada cluster é tratado como um sub-problema do Caixeiro Viajante (TSP). A otimização da rota interna é feita através da **Heurística do Vizinho Mais Próximo**. Esta heurística constrói a rota de forma gulosa, escolhendo a próxima entrega mais próxima do ponto atual. O ponto de partida de cada rota é definido como o ponto mais próximo do centróide do cluster. A distância entre os pontos é calculada com a fórmula **Haversine** (distância em linha reta na superfície da Terra).
 
 ## 🧠 3. Algoritmos Utilizados
 
 | Algoritmo | Tipo | Aplicação no Projeto |
 | :--- | :--- | :--- |
-| **K-Means** | Aprendizado Não Supervisionado | Responsável por agrupar as coordenadas do `entregas.csv` em *N* clusters (zonas de entrega). |
-| **Grafo** | Estrutura de Dados | Representação teórica da rota dentro de cada cluster, essencial para a otimização sequencial. |
-| **Busca A\* (A-Star)** | Algoritmo de Busca Heurística | **Aplicação Teórica:** É o algoritmo ideal proposto para ser usado para encontrar o caminho mais curto entre os pontos do grafo, minimizando o custo total da rota. |
+| **K-Means** | Aprendizado Não Supervisionado | Agrupamento de pontos de entrega em 'K' zonas coesas. O valor de 'K' é justificado pelo Método do Cotovelo. |
+| **Haversine** | Cálculo de Distância (Geopy) | Utilizado para calcular a distância real em quilômetros entre dois pontos (latitude/longitude), essenciais para o sequenciamento da rota. |
+| **Vizinho Mais Próximo** | Heurística de Busca (Guloso) | Solução rápida para sequenciar as entregas dentro de cada cluster, minimizando a distância percorrida a cada passo da rota. |
 
 ## 📊 4. Diagrama do Grafo/Modelo
 
-**Diagrama do Modelo de Agrupamento K-Means**
-*(Este diagrama representa as zonas de entrega e os Centróides gerados pelo algoritmo.)*
+Cada cluster (zona de entrega) é modelado como um **Grafo Completo**, onde:
+* **Nós (Vértices):** Correspondem aos pontos de entrega.
+* **Arestas:** Representam as conexões (distâncias Haversine) entre cada par de pontos de entrega.
 
-![Diagrama de Clusters K-Means](docs/diagrama_clusters.png)
+O algoritmo **Vizinho Mais Próximo** explora este grafo para encontrar uma rota eficiente.
+
+*(Insira aqui o diagrama ou a imagem estática conforme o requisito:)*
+![Solução Final de Roteamento (K-Means + Vizinho Mais Próximo)](outputs/solucao_final_roteamento.png)
 
 ## 📈 5. Análise dos Resultados, Eficiência e Limitações
 
 ### Análise de Resultados e Eficiência
-O sucesso do agrupamento foi avaliado pela **Métrica de Coesão**, que mede a distância média dos pontos ao centroide de seu cluster. O baixo valor da coesão demonstra a alta eficiência do K-Means em criar grupos geograficamente densos, resultando em rotas iniciais já otimizadas. Nossa abordagem se alinha com o sistema **ORION** da UPS, que utiliza otimização e heurísticas para redução massiva de custos.
+A solução combinada demonstra alta **eficiência de processamento** (K-Means e Vizinho Mais Próximo são algoritmos de execução rápida) e produz rotas **significativamente otimizadas** em comparação com rotas aleatórias.
+* **K-Means:** O **Método do Cotovelo** justifica a escolha de $K=3$ (no exemplo), garantindo a alta coesão dos grupos (pontos próximos ao centroide).
+* **Vizinho Mais Próximo:** Garante que, a cada passo da viagem, o entregador está se movendo para o destino mais próximo, resultando em uma rota total reduzida.
 
 ### Limitações e Sugestões de Melhoria
-A principal limitação do projeto é a **implementação da Busca A\***, que está tratada de forma conceitual. Em uma aplicação de produção, o algoritmo A\* (ou um similar, como o *Branch and Bound*) deveria ser totalmente codificado para calcular a rota ideal em tempo real, incorporando dados de tráfego (arestas variáveis).
+A principal limitação reside na escolha da heurística de roteamento:
+1.  **Vizinho Mais Próximo é Sub-Ótimo:** Embora rápido, o Vizinho Mais Próximo é um algoritmo guloso. Ele **não garante a menor distância total** (o ótimo global) para o Problema do Caixeiro Viajante (TSP). Rotas melhores podem existir.
+2.  **Distância em Linha Reta (Haversine):** A solução usa a distância em linha reta. Em um cenário real, as rotas devem considerar a rede viária e o tráfego em tempo real.
 
-## 🛠️ 6. Instruções para Execução
-
-1.  **Pré-requisitos:** Certifique-se de ter Python instalado.
-2.  **Bibliotecas:** Instale as bibliotecas necessárias:
-    ```bash
-    pip install pandas numpy scikit-learn matplotlib seaborn scipy
-    ```
-3.  **Execução:** Execute o arquivo principal a partir da raiz do repositório:
-    ```bash
-    python src/otimizacao_entregas.py
-    ```
-    *(Isso irá processar os dados, gerar o agrupamento no console e exibir os gráficos.)*
+**Sugestões de Melhoria:**
+* **Trocar o Algoritmo de Roteamento:** Substituir o Vizinho Mais Próximo por uma heurística mais robusta, como o algoritmo **2-opt** ou **3-opt** (para otimizar a rota pós-geração), ou implementar um algoritmo exato (e mais lento) como **Branch and Bound** (se o número de entregas por cluster for pequeno).
+* **Incorporar Dados de Tráfego:** Utilizar APIs de mapeamento (como Google Maps API) para calcular a distância real da rua e o tempo de viagem, incorporando o tráfego em tempo real como o peso das arestas do grafo.
